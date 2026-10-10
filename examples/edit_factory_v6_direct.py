@@ -10,7 +10,7 @@ def run():
   a.save_document(d,str(out/'Цех-40x24-А0-v6.cdw'));a.set_active_view(d,1)
   old=a.list_objects(d)['items']
   def layer(n):a.set_active_layer(d,n)
-  def rect(x,y,w,h,style=2):return a.rectangle(d,x,y,w,h,style)
+  def rect(x,y,w,h,style=2):return a.rectangle(d,x,y,w,h,style=style)
   def line(x,y,xx,yy,style=2):return a.line(d,x,y,xx,yy,style)
   def text(x,y,s,h=2.6):
    layer(5);return a.text(d,x,y,s,h)
@@ -80,7 +80,7 @@ def run():
   toilet(800,11200);toilet(2850,11200)
   # Replace the two kitchen tables and seven crude seats, preserving sinks and appliances.
   for o in old:
-   if o['view']==1 and o['type']=='rectangle' and o['layer_number']==2 and (o['base'] in ([1800,1300],[4800,1300]) and (o['width'],o['height'])==(1800,900) or (o['width'],o['height'])==(500,500) and o['base'][0]<7000 and o['base'][1]<3000):a.delete_object(d,o['reference'])
+   if o['view']==1 and o['type']=='rectangle' and o['layer_number']==2 and (o['base'] in ([1800,1300],[4800,1300]) and (o['width'],o['height'])==(1800,900) or (abs(o['width']),abs(o['height']))==(500,500) and o['base'][0]<7000 and o['base'][1]<3000):a.delete_object(d,o['reference'])
   kitchen=[o['reference'] for o in old if o['view']==1 and o['layer_number']==2 and points(o) and all(600<=x<=4100 and 3200<=y<=3800 for x,y in points(o))]
   a.move_objects(d,kitchen,0,500)  # Counter with both sinks and hob now touches the kitchen wall.
   a.move_object(d,label('03 КУХНЯ')['reference'],3600,0)
