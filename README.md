@@ -33,7 +33,7 @@ $env:KOMPAS_EXECUTABLE = 'D:\ASCON\KOMPAS-3D v21\Bin\KOMPAS.exe'
 
 Формат секции зависит от клиента. Проект пока не добавлен в глобальную конфигурацию Codex; проверка использует настоящий stdio-клиент из examples/client.py.
 
-## 35 инструментов
+## 38 инструментов
 
 | Группа | Инструменты |
 | --- | --- |
@@ -42,7 +42,7 @@ $env:KOMPAS_EXECUTABLE = 'D:\ASCON\KOMPAS-3D v21\Bin\KOMPAS.exe'
 | Геометрия и оформление | line, rectangle, circle, arc, text, linear_dimension, hatch_rectangle |
 | Сложная геометрия | polyline, mixed_contour, bezier, hatch_polygon |
 | Симметрия и массивы | mirror_object, linear_array, circular_array |
-| Работа с объектами | copy_object, move_object, rotate_object, delete_object, list_objects |
+| Работа с объектами | copy_object, move_object, move_objects, resize_rectangle, edit_text, rotate_object, delete_object, list_objects |
 | Выделение и перенос | get_selected_objects, copy_objects_to_document |
 | Экспорт | export_png, export_pdf |
 
@@ -87,3 +87,5 @@ MCP основан на [официальном Python SDK](https://github.com/m
 `copy_objects_to_document(source_id, target_id, references=[...], dx=0, dy=0)` копирует нативную геометрию в активный вид целевого чертежа. Координаты в миллиметрах вида: разный масштаб источника и назначения не меняет реальные габариты. Вместо references можно `selected=true`: выделите объекты в исходном документе. `get_selected_objects` возвращает эти объекты и ссылки. Поддерживаются типы из list_objects; другие типы отклоняются до копирования. Исходник сохраняется, системный буфер обмена не используется. При ошибке до вставки временная группа очищается; при неопределённом результате после вставки выдаются оставшиеся API references для проверки перед повтором.
 
 [Актуальная редакция 4 и особенности API](docs/revision-3.md): охлаждающий тоннель сохранён, широкий центральный коридор убран; склады заполнены стеллажами с проездами. Добавлены корректные дверные дуги, native PDF и перенос.
+
+[Актуальная редакция 5](docs/revision-5.md): 40 шкафчиков, две линии, загруженные паллеты и фасад стеллажа. Проверены редактирование и перенос комнат; добавлены resize_rectangle, edit_text и move_objects.
