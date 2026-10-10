@@ -83,6 +83,14 @@ def run():
    if o['view']==1 and o['type']=='rectangle' and o['layer_number']==2 and (o['base'] in ([1800,1300],[4800,1300]) and (o['width'],o['height'])==(1800,900) or (o['width'],o['height'])==(500,500) and o['base'][0]<7000 and o['base'][1]<3000):a.delete_object(d,o['reference'])
   kitchen=[o['reference'] for o in old if o['view']==1 and o['layer_number']==2 and points(o) and all(600<=x<=4100 and 3200<=y<=3800 for x,y in points(o))]
   a.move_objects(d,kitchen,0,500)  # Counter with both sinks and hob now touches the kitchen wall.
+  a.move_object(d,label('03 КУХНЯ')['reference'],3600,0)
+  # The old circular burner array exceeded its hob footprint; redraw a 2 x 2 layout.
+  current=a.list_objects(d)['items']
+  for o in current:
+   if o['view']==1 and o['type']=='circle' and o['radius']==90 and 2600<=o['center'][0]<=3600 and 3000<=o['center'][1]<=4400:a.delete_object(d,o['reference'])
+  layer(2)
+  for x in (2820,3360):
+   for y in (3870,4080):a.circle(d,x,y,90,2)
   layer(2)
   def rounded(x,y,w,h,r=65):
    line(x+r,y,x+w-r,y);line(x+w,y+r,x+w,y+h-r);line(x+w-r,y+h,x+r,y+h);line(x,y+h-r,x,y+r)
