@@ -3,16 +3,18 @@ from .core import positive,finite
 
 def checked_resize(width,height):return {'Width':positive(width,'width'),'Height':positive(height,'height')}
 
-def apply_properties(obj,values):
+def apply_properties(obj,values,verify_names=None,postcheck=None):
     before={name:getattr(obj,name) for name in values}
     try:
         for name,value in values.items():setattr(obj,name,value)
         if not obj.Update():raise RuntimeError('Update failed')
         for name,value in values.items():
+            if verify_names is not None and name not in verify_names:continue
             actual=getattr(obj,name)
             if isinstance(value,(int,float)):
                 if abs(actual-value)>1e-6:raise RuntimeError(f'{name} postcondition failed')
             elif actual!=value:raise RuntimeError(f'{name} postcondition failed')
+        if postcheck:postcheck()
     except Exception as error:
         failed=[]
         for name,value in before.items():
@@ -28,7 +30,7 @@ class NativeEdits:
     def _find_native_object(self,document_id,reference,kind=None):
         ref=self._checked_reference(document_id,reference)
         views=self._views(document_id)
-        mapping={'rectangle':('Rectangles','IRectangle'),'text':('DrawingTexts','IDrawingText')}
+        mapping={'rectangle':('Rectangles','IRectangle'),'text':('DrawingTexts','IDrawingText'),'line':('LineSegments','ILineSegment'),'circle':('Circles','ICircle'),'arc':('Arcs','IArc'),'polyline':('PolyLines2D','IPolyLine2D'),'contour':('DrawingContours','IDrawingContour'),'bezier':('Beziers','IBezier'),'hatch':('Hatches','IHatch')}
         for i in range(views.Count):
             view=views.View(i);container=self.api7.IDrawingContainer(view)
             for name,(collection,interface) in mapping.items():

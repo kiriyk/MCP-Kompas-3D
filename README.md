@@ -33,7 +33,7 @@ $env:KOMPAS_EXECUTABLE = 'D:\ASCON\KOMPAS-3D v21\Bin\KOMPAS.exe'
 
 Формат секции зависит от клиента. Проект пока не добавлен в глобальную конфигурацию Codex; проверка использует настоящий stdio-клиент из examples/client.py.
 
-## 38 инструментов
+## 41 инструментов
 
 | Группа | Инструменты |
 | --- | --- |
@@ -42,7 +42,7 @@ $env:KOMPAS_EXECUTABLE = 'D:\ASCON\KOMPAS-3D v21\Bin\KOMPAS.exe'
 | Геометрия и оформление | line, rectangle, circle, arc, text, linear_dimension, hatch_rectangle |
 | Сложная геометрия | polyline, mixed_contour, bezier, hatch_polygon |
 | Симметрия и массивы | mirror_object, linear_array, circular_array |
-| Работа с объектами | copy_object, move_object, move_objects, resize_rectangle, edit_text, rotate_object, delete_object, list_objects |
+| Работа с объектами | copy_object, move_object, move_objects, resize_rectangle, edit_text, rotate_object, delete_object, list_objects, set_object_properties, edit_linear_dimension, get_object_boundaries |
 | Выделение и перенос | get_selected_objects, copy_objects_to_document |
 | Экспорт | export_png, export_pdf |
 
@@ -93,3 +93,5 @@ MCP основан на [официальном Python SDK](https://github.com/m
 [Редакция 6](docs/revision-6.md): две цепочки подготовки массы, обновлённые кухонные столы и стулья, отдельные входы WC/душевой, двери всех туалетных кабинок и раковины у стен.
 
 [Редакция 7](docs/revision-7.md): исправлены наклоны мебели, сантехники и стен, оставшиеся старые зеркальные стулья удалены.
+
+[Дополнительные операции v0.5](docs/advanced-edits.md): set_object_properties (абсолютный угол и стиль), edit_linear_dimension (существующий размер), get_object_boundaries (границы контуров и штриховок).

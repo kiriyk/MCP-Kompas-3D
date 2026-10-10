@@ -13,8 +13,9 @@ from .features import NativeFeatures
 from .io_features import NativeIO
 
 from .edits import NativeEdits
+from .advanced_edits import AdvancedEdits
 
-class Adapter(NativeFeatures, NativeIO, NativeEdits):
+class Adapter(NativeFeatures, NativeIO, NativeEdits, AdvancedEdits):
     def __init__(self):
         import pythoncom
         self.com=pythoncom;pythoncom.CoInitializeEx(pythoncom.COINIT_APARTMENTTHREADED)
@@ -340,4 +341,4 @@ class Adapter(NativeFeatures, NativeIO, NativeEdits):
         verified_output(path,lambda stage:doc.SaveAsToRasterFormat(stage,param),b'\x89PNG\r\n\x1a\n')
         return {'path':path,'bytes':Path(path).stat().st_size,'capture_mode':'native_sheet'}
 
-PUBLIC_TOOLS=('connect','create_drawing','open_document','close_document','save_document','set_sheet','document_state','create_view','set_active_view','view_to_sheet','create_layer','set_active_layer','line','rectangle','circle','arc','text','linear_dimension','hatch_rectangle','copy_object','move_object','rotate_object','delete_object','list_objects','export_png','polyline','mixed_contour','bezier','mirror_object','linear_array','circular_array','hatch_polygon','export_pdf','get_selected_objects','copy_objects_to_document','resize_rectangle','edit_text','move_objects')
+PUBLIC_TOOLS=('connect','create_drawing','open_document','close_document','save_document','set_sheet','document_state','create_view','set_active_view','view_to_sheet','create_layer','set_active_layer','line','rectangle','circle','arc','text','linear_dimension','hatch_rectangle','copy_object','move_object','rotate_object','delete_object','list_objects','export_png','polyline','mixed_contour','bezier','mirror_object','linear_array','circular_array','hatch_polygon','export_pdf','get_selected_objects','copy_objects_to_document','resize_rectangle','edit_text','move_objects','set_object_properties','edit_linear_dimension','get_object_boundaries')
