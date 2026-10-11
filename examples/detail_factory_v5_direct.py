@@ -1,7 +1,7 @@
 from pathlib import Path
 from kompas_local_mcp.adapter import Adapter
 import json
-a=Adapter();out=Path(r'C:\Users\user\DevProjects\MCP-Kompas-3D\artifacts')
+a=Adapter();out=Path(__file__).resolve().parents[1]/'artifacts'
 try:
  a.connect();d=a.open_document(str(out/'Цех-40x24-А0-v5.cdw'))['document_id'];a.set_active_view(d,1);a.create_layer(d,'Детали машин и конвейеров',8,0)
  def line(x,y,xx,yy):return a.line(d,x,y,xx,yy,2)

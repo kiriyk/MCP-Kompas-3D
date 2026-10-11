@@ -2,7 +2,7 @@
 
 Goal: работающий локальный stdio MCP и учебный план цеха А0.
 Architecture: SDK MCP → последовательный STA worker → типизированный API5/API7.
-Spec: [design.md](design.md). Execution: inline, решения поручены пользователем.
+Spec: [design.md](design.md). Execution: direct API probes followed by stdio verification.
 
 1. [x] Тесты координат/путей/ссылок/очереди: сначала RED, затем минимальные core и worker.
 2. [x] Каркас MCP и adapter: failing stdio smoke test, подключение COM, документы, лист, вид и примитивы; затем GREEN на КОМПАС v21.

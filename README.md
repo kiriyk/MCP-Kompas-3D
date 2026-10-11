@@ -9,7 +9,7 @@
 ```powershell
 python -m venv .venv
 .venv\Scripts\python.exe -m pip install -e .
-$env:KOMPAS_EXECUTABLE = 'D:\ASCON\KOMPAS-3D v21\Bin\KOMPAS.exe'
+$env:KOMPAS_EXECUTABLE = 'C:\path\to\KOMPAS-3D v21\Bin\KOMPAS.exe'
 .venv\Scripts\python.exe -m kompas_local_mcp.server
 ```
 
@@ -20,18 +20,26 @@ $env:KOMPAS_EXECUTABLE = 'D:\ASCON\KOMPAS-3D v21\Bin\KOMPAS.exe'
 ```json
 {
   "mcpServers": {
-    "kompas-local": {
-      "command": "C:/Users/user/DevProjects/MCP-Kompas-3D/.venv/Scripts/python.exe",
+    "kompas_3d": {
+      "command": "C:/path/to/MCP-Kompas-3D/.venv/Scripts/python.exe",
       "args": ["-m", "kompas_local_mcp.server"],
       "env": {
-        "KOMPAS_EXECUTABLE": "D:/ASCON/KOMPAS-3D v21/Bin/KOMPAS.exe"
+        "KOMPAS_EXECUTABLE": "C:/path/to/KOMPAS-3D v21/Bin/KOMPAS.exe"
       }
     }
   }
 }
 ```
 
-Формат секции зависит от клиента. Проект пока не добавлен в глобальную конфигурацию Codex; проверка использует настоящий stdio-клиент из examples/client.py.
+Формат секции зависит от клиента. Для Codex см. [config/codex.example.toml](config/codex.example.toml): перенесите секцию в пользовательский config.toml и замените условные пути. Команда `codex mcp get kompas_3d` проверяет регистрацию. После изменения конфигурации обновите подключение или перезапустите Codex. Не публикуйте заполненную локальную конфигурацию.
+
+Пример регистрации из PowerShell после установки пакета (замените пути):
+
+```powershell
+codex mcp add kompas_3d --env 'KOMPAS_EXECUTABLE=C:/path/to/KOMPAS-3D v21/Bin/KOMPAS.exe' --env 'PYTHONIOENCODING=utf-8' -- 'C:/path/to/MCP-Kompas-3D/.venv/Scripts/python.exe' -m kompas_local_mcp.server
+```
+
+Переменные среды: KOMPAS_EXECUTABLE — установленный EXE, KOMPAS_SDK — отдельный SDK при нестандартной структуре, KOMPAS_MCP_CACHE — необязательный каталог COM wrappers (по умолчанию временная папка ОС). Сервер не содержит путей к конкретной машине.
 
 ## 41 инструментов
 
@@ -98,6 +106,6 @@ MCP основан на [официальном Python SDK](https://github.com/m
 
 ## Скилл для агента
 
-[skills/kompas-mcp-workflow/SKILL.md](skills/kompas-mcp-workflow/SKILL.md) описывает работу агента с текущим stdio MCP: запуск v21, 41 метод, сессии и ссылки, виды и масштабы, составные правки, нативные размеры, сохранение и PDF, тайм-ауты и расширение через SDK. В scripts/mcp_client.py — пакетный клиент; без --actions он только читает tools/list. Старый EXE MCP 1.0.22 отделён в архивные справочники.
+[skills/kompas-mcp-workflow/SKILL.md](skills/kompas-mcp-workflow/SKILL.md) описывает работу агента с зарегистрированным stdio MCP: 41 метод, сессии и ссылки, виды и масштабы, составные правки, нативные размеры, сохранение и PDF, тайм-ауты и расширение через SDK. Скилл использует зарегистрированные инструменты; отдельного клиента или обхода отсутствующего подключения в нём нет.
 
-Версионируемый источник скилла находится в этом репозитории; установленная копия — C:\Users\user\.codex\skills\kompas-mcp-workflow. После правок синхронизируйте файлы и проверяйте актуальные tools/list, сигнатуры и поведение клиента. Скилл не регистрирует подключение автоматически и не меняет конфигурацию Codex.
+Для установки скопируйте папку skills/kompas-mcp-workflow в каталог пользовательских скиллов Codex, например `$HOME/.agents/skills/kompas-mcp-workflow`. Если среда использует `$CODEX_HOME/skills`, установите туда, не создавая дубликат. Метаданные agents/openai.yaml объявляют зависимость от MCP с именем kompas_3d; при другом имени регистрации согласуйте её. Регистрация сервера — отдельная локальная настройка. При обновлении синхронизируйте источник с установленной копией и проверяйте актуальные tools/list.

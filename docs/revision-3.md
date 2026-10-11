@@ -1,6 +1,6 @@
 # Редакции 3–4: нативный PDF, перенос и плотные склады
 
-Проверено прямыми вызовами на локальном КОМПАС-3D v21 10 октября 2026, затем через stdio MCP.
+Проверено прямыми вызовами на КОМПАС-3D v21, затем через stdio MCP.
 
 ## Что в актуальном плане
 
@@ -26,7 +26,7 @@
 ## Запуск
 
 ```powershell
-$env:KOMPAS_EXECUTABLE='D:\ASCON\KOMPAS-3D v21\Bin\KOMPAS.exe'
+$env:KOMPAS_EXECUTABLE='C:\path\to\KOMPAS-3D v21\Bin\KOMPAS.exe'
 .venv\Scripts\python.exe examples/probe_io_direct.py
 .venv\Scripts\python.exe examples/probe_io_mcp.py
 .venv\Scripts\python.exe examples/build_factory_v4_direct.py

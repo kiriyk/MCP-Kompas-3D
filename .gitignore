@@ -5,3 +5,12 @@ __pycache__/
 .pytest_cache/
 .kompas-cache/
 artifacts/
+
+# Machine-specific configuration and diagnostics
+.env
+.env.*
+!.env.example
+config/*.local.toml
+config/codex.toml
+logs/
+*.log

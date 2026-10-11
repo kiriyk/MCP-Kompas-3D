@@ -1,0 +1,12 @@
+# Copy this section into your local Codex config and replace both example paths.
+# Do not commit your filled-in local configuration.
+[mcp_servers.kompas_3d]
+command = "C:/path/to/MCP-Kompas-3D/.venv/Scripts/python.exe"
+args = ["-m", "kompas_local_mcp.server"]
+startup_timeout_sec = 60
+tool_timeout_sec = 75
+enabled = true
+
+[mcp_servers.kompas_3d.env]
+KOMPAS_EXECUTABLE = "C:/path/to/KOMPAS-3D v21/Bin/KOMPAS.exe"
+PYTHONIOENCODING = "utf-8"

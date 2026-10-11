@@ -34,7 +34,7 @@
 `examples/probe_advanced_edits_mcp.py`: список 41 инструмента, три новых метода, отказы неподдерживаемому типу/стилю/нулевому размеру без изменения измерения, Save/Close/Open и PNG. JSON результатов сохраняется в artifacts/.
 
 ```powershell
-$env:KOMPAS_EXECUTABLE='D:\ASCON\KOMPAS-3D v21\Bin\KOMPAS.exe'
+$env:KOMPAS_EXECUTABLE='C:\path\to\KOMPAS-3D v21\Bin\KOMPAS.exe'
 .venv\Scripts\python.exe -m unittest discover -s tests
 .venv\Scripts\python.exe examples/probe_advanced_edits_direct.py
 .venv\Scripts\python.exe examples/probe_advanced_edits_mcp.py

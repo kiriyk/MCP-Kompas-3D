@@ -1,4 +1,11 @@
 interface:
   display_name: "КОМПАС-3D MCP"
   short_description: "Чертежи, правки и PDF через локальный stdio MCP v21"
-  default_prompt: "Используй $kompas-mcp-workflow для работы с чертежом через наш локальный MCP КОМПАС-3D v21."
+  default_prompt: "Используй $kompas-mcp-workflow для работы с чертежом через зарегистрированный локальный MCP КОМПАС-3D v21."
+
+dependencies:
+  tools:
+    - type: "mcp"
+      value: "kompas_3d"
+      description: "kompas-local-mcp for native KOMPAS-3D v21 drawings"
+      transport: "stdio"

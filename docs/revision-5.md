@@ -33,7 +33,7 @@
 ## Воспроизведение
 
 ```powershell
-$env:KOMPAS_EXECUTABLE='D:\ASCON\KOMPAS-3D v21\Bin\KOMPAS.exe'
+$env:KOMPAS_EXECUTABLE='C:\path\to\KOMPAS-3D v21\Bin\KOMPAS.exe'
 .venv\Scripts\python.exe examples/probe_edits_direct.py
 .venv\Scripts\python.exe examples/probe_edits_mcp.py
 # Нужен сохранённый artifacts/Цех-40x24-А0-v4.cdw; сначала build_factory_v4_direct.py.
