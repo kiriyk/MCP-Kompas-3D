@@ -15,14 +15,19 @@ from .io_features import NativeIO
 from .edits import NativeEdits
 from .advanced_edits import AdvancedEdits
 
-class Adapter(NativeFeatures, NativeIO, NativeEdits, AdvancedEdits):
+from .model_documents import ModelDocuments
+from .model_features import ModelFeatures
+from .model_assembly import ModelAssembly
+from .model_io import ModelIO
+
+class Adapter(NativeFeatures, NativeIO, NativeEdits, AdvancedEdits, ModelDocuments, ModelFeatures, ModelAssembly, ModelIO):
     def __init__(self):
         import pythoncom
         self.com=pythoncom;pythoncom.CoInitializeEx(pythoncom.COINIT_APARTMENTTHREADED)
-        self.app=None;self.docs={};self.refs=ReferenceStore()
+        self.app=None;self.docs={};self.refs=ReferenceStore();self.model_refs={}
 
     def shutdown(self):
-        self.docs.clear();self.app=None
+        self.docs.clear();self.model_refs.clear();self.app=None
         self.com.CoUninitialize()
 
     def connect(self, executable: str | None = None, launch: bool = False) -> dict:
@@ -342,3 +347,9 @@ class Adapter(NativeFeatures, NativeIO, NativeEdits, AdvancedEdits):
         return {'path':path,'bytes':Path(path).stat().st_size,'capture_mode':'native_sheet'}
 
 PUBLIC_TOOLS=('connect','create_drawing','open_document','close_document','save_document','set_sheet','document_state','create_view','set_active_view','view_to_sheet','create_layer','set_active_layer','line','rectangle','circle','arc','text','linear_dimension','hatch_rectangle','copy_object','move_object','rotate_object','delete_object','list_objects','export_png','polyline','mixed_contour','bezier','mirror_object','linear_array','circular_array','hatch_polygon','export_pdf','get_selected_objects','copy_objects_to_document','resize_rectangle','edit_text','move_objects','set_object_properties','edit_linear_dimension','get_object_boundaries')
+
+PUBLIC_TOOLS += ('create_part','create_assembly','model_state','save_model','open_model','close_model','create_sketch','sketch_polygon','sketch_circle','extrude','set_extrusion_depth','rebuild_model')
+
+
+PUBLIC_TOOLS += ('insert_component','set_component_placement','list_components','export_model')
+
