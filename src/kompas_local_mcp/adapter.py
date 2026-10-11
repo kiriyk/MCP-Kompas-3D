@@ -19,8 +19,9 @@ from .model_documents import ModelDocuments
 from .model_features import ModelFeatures
 from .model_assembly import ModelAssembly
 from .model_io import ModelIO
+from .model_views import ModelViews
 
-class Adapter(NativeFeatures, NativeIO, NativeEdits, AdvancedEdits, ModelDocuments, ModelFeatures, ModelAssembly, ModelIO):
+class Adapter(NativeFeatures, NativeIO, NativeEdits, AdvancedEdits, ModelDocuments, ModelFeatures, ModelAssembly, ModelIO, ModelViews):
     def __init__(self):
         import pythoncom
         self.com=pythoncom;pythoncom.CoInitializeEx(pythoncom.COINIT_APARTMENTTHREADED)
@@ -177,7 +178,8 @@ class Adapter(NativeFeatures, NativeIO, NativeEdits, AdvancedEdits, ModelDocumen
         """Activate a view through API7 and verify the current number."""
         views=self._views(document_id);v=views.ViewByNumber(view_number)
         if v is None:raise ValueError('View not found')
-        v.Current=True;v.Update()
+        if v.ViewType in (2,3,4,5,7):self._a5(document_id).ksOpenView(view_number)
+        else:v.Current=True;v.Update()
         if views.ActiveView.Number!=view_number:self._a5(document_id).ksOpenView(view_number)
         if views.ActiveView.Number!=view_number:raise RuntimeError('Active view postcondition failed')
         return self._view(views.ActiveView)
@@ -352,4 +354,11 @@ PUBLIC_TOOLS += ('create_part','create_assembly','model_state','save_model','ope
 
 
 PUBLIC_TOOLS += ('insert_component','set_component_placement','list_components','export_model')
+
+
+PUBLIC_TOOLS += ('create_model_view','create_section_view','update_model_views','model_view_state')
+
+
+PUBLIC_TOOLS += ('set_model_color',)
+
 

@@ -43,5 +43,9 @@ class ModelTests(unittest.TestCase):
   self.assertIsNone(solid_bounds((False,0,0,0,0,0,0)))
   self.assertIsNone(solid_bounds((True,1e300,1e300,1e300,-1e300,-1e300,-1e300)))
   self.assertEqual(solid_bounds((True,0,0,0,20,30,40)),{'min':[0.,0.,0.],'max':[20.,30.,40.],'size':[20.,30.,40.]})
+ def test_bad_model_color_rejected_before_com(self):
+  a=self.adapter('set_model_color')
+  for color in (-1,0x1000000,True,1.5):
+   with self.assertRaises(ValueError):a.set_model_color('d',color)
 
 if __name__=='__main__':unittest.main()

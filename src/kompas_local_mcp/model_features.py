@@ -5,6 +5,17 @@ from .model_documents import model_name
 from .profile_validation import polygon
 
 class ModelFeatures:
+    def set_model_color(self,document_id: str,color: int) -> dict:
+        """Set native part COLORREF (0x00BBGGRR) and verify readback; not a rendering filter."""
+        if isinstance(color,bool) or not isinstance(color,int) or not 0<=color<=0xFFFFFF:raise ValueError('Color must be an integer COLORREF 0..0xFFFFFF')
+        part=self._part5(document_id);old=part.GetAdvancedColor();old_use=part.useColor
+        try:
+            part.useColor=1;part.SetAdvancedColor(color,.4,.8,.2,.5,0,0);part.Update()
+            actual=part.GetAdvancedColor()
+            if not actual[0] or actual[1]!=color:raise RuntimeError('Part color postcondition failed')
+        except Exception:
+            part.SetAdvancedColor(*old[1:]);part.useColor=old_use;part.Update();raise
+        return {'color':actual[1],'color_format':'COLORREF 0x00BBGGRR'}
     def create_sketch(self,document_id: str,plane: Literal['XY','XZ','YZ'],name: str='Sketch',offset: float=0) -> dict:
         """Sketch on a standard/offset plane. Local XY coordinates; offset follows plane normal."""
         if plane not in ('XY','XZ','YZ'):raise ValueError('Expected XY, XZ or YZ')
