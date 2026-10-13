@@ -31,3 +31,26 @@
 ## Проверки v0.5
 
 28 unit tests; прямой SDK probe трёх новых методов с Save/Close/Open; stdio probe проверяет 41 инструмент, изменения свойств/размеров, границы и отказы некорректным действиям. Подробности в [advanced-edits.md](advanced-edits.md).
+
+
+### Native color/opacity regression (2026-10-11)
+
+`IColorParam7.Transparency` is opacity in the SDK: 1 is opaque, 0 is invisible.
+This is the inverse of the transparency percentage shown in the KOMPAS UI.
+The previous `set_model_color` passed 0 and did not check `ksPart.Update`.
+Use API7 TopPart, query IColorParam7 explicitly, call SetAdvancedColor with 1,
+require TopPart.Update success, then read color and opacity from TopPart again.
+Never validate only the transient API5 proxy. Own colors on bodies/faces can
+override the top part, and assembly components may inherit their source color.
+
+Validation: 50 unit tests passed (including opacity and failed-update regressions).
+Fresh stdio MCP set_model_color/save/close followed by independent native reopen
+retained color 0x33FF6B and SDK opacity 1. All 10 saved assembly components were
+opaque after reopen. Native COLOR_OBJECT raster export showed colored surfaces.
+Generated part files were repaired with backups; volumes remained unchanged.
+OpenGL rendering settings require a complete KOMPAS restart to take effect;
+reopening a document alone is insufficient.
+
+Sources:
+- https://help.ascon.ru/KOMPAS_SDK/22/ru-RU/icolorparam7_transparency.html
+- https://help.ascon.ru/KOMPAS/21/ru-RU/28_4_5_osobennosti.html

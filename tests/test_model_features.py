@@ -47,5 +47,9 @@ class ModelTests(unittest.TestCase):
   a=self.adapter('set_model_color')
   for color in (-1,0x1000000,True,1.5):
    with self.assertRaises(ValueError):a.set_model_color('d',color)
+ def test_invalid_material_density_rejected_before_com(self):
+  a=self.adapter('set_model_material')
+  for density in (0,-1,float('nan')):
+   with self.assertRaises(ValueError):a.set_model_material('d','PLA',density)
 
 if __name__=='__main__':unittest.main()

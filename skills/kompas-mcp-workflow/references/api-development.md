@@ -16,4 +16,7 @@ SDK относительно каталога установки: `SDK/lib/kAPI5
 - Шрифт текста подтверждай сохранением/переоткрытием: временно восстановленный ITextFont не доказывает стойкость.
 - SaveAs и обновления требуют проверки нового файла/фактических свойств. Нельзя объявлять успех по одному return value.
 
-Примеры проверок: examples/probe_advanced_edits_direct.py и probe_advanced_edits_mcp.py; examples/client.py — JSON-RPC transport. docs/advanced-edits.md и docs/revision-5.md..revision-7.md фиксируют наблюдения. Юнит-тесты не заменяют живой COM, а живой COM не заменяет проверку stdio-схем. Отделяй подтверждённое от ограничений. Проверено локально на v21 для 2D; не обобщай на 3D/другие версии без испытаний.
+Примеры проверок: examples/probe_advanced_edits_direct.py и probe_advanced_edits_mcp.py; examples/client.py — JSON-RPC transport. docs/advanced-edits.md и docs/revision-5.md..revision-7.md фиксируют наблюдения. Юнит-тесты не заменяют живой COM, а живой COM не заменяет проверку stdio-схем. Отделяй подтверждённое от ограничений. Исторические probes этого раздела проверяли v21 2D; отдельная проверка 3D v0.6 описана ниже. Другие версии требуют испытаний.
+
+
+3D в v0.6 отдельно проверен прямыми SDK probes и fresh stdio MCP: эскизы/выдавливания/вырезы, материал/цвет, повторные компоненты и преобразования, нативные виды и перестроение разрезов, save/reopen и STL. См. model-workflow.md и examples/probe_models_mcp.py. Прежнее ограничение 2D относится к историческим probes, а не к этому новому проверенному набору. Не обобщайте его на ещё не проверенные операции SDK.

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Сложные формы в КОМПАС-3D"
+  short_description: "Loft, sweep, оболочки и цветные сборки КОМПАС v21"
+  default_prompt: "Используй $kompas-complex-modeling для проектирования сложной модели в КОМПАС-3D по референсу."

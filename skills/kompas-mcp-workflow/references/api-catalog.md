@@ -1,6 +1,6 @@
-# Каталог kompas-local-mcp v0.5.0
+# Каталог kompas-local-mcp v0.8.0
 
-Снимок 41 публичной сигнатуры из Adapter. При отличии актуальные tools/list и исходники важнее. Параметры self исключены; вызывай MCP именованными JSON-аргументами. Все document_id/reference получаются в текущей сессии. Размеры и координаты — мм вида, если не оговорено иначе. Методы обычно возвращают dict; не выдумывай ключи результата, читай ответ.
+Исторические сигнатуры и дополнения v0.8; актуальные tools/list важнее. Используйте именованные аргументы. Соглашения 3D см. model-workflow.md.
 
 ## connect
 
@@ -72,7 +72,7 @@ Create and activate a view. Model coordinates are mm; scale is 0.02 for 1:50; an
 set_active_view(document_id: str, view_number: int) -> dict
 ```
 
-Activate a view through API7 and verify the current number.
+Activate a view through API7; associative views use API5 ksOpenView and verify the current number.
 
 ## view_to_sheet
 
@@ -330,15 +330,182 @@ get_object_boundaries(document_id: str, reference: str) -> dict
 
 Read native contour or hatch boundaries and exact union bounds in owner-mm (no stroke width). Supports lines and circular arcs; rejects other segment types. No CAD mutation.
 
-## Правила параметров и границы
+## create_part
 
-- polyline: points — [[x,y],...], 2..1000, closed=True требует ≥3; соседние вершины не повторять. Стиль задавай именованно.
-- mixed_contour: 1..1000 segments. Отрезок: {"type":"line","x1":0,"y1":0,"x2":100,"y2":0}; дуга: {"type":"arc","x":100,"y":100,"radius":100,"start_angle":270,"end_angle":360}. Дуги CCW. Агент отвечает за стыковку и замкнутость; это один нативный контур.
-- bezier: 2..500 nodes: {"x":0,"y":0,"angle":0,"left":0,"right":100}; left/right — неотрицательные длины управляющих плеч, angle — градусы. Пропущенные поля становятся нулями, поэтому задавай узлы явно.
-- linear_array/circular_array: целый count 2..500, включает исходник. Линейный dx/dy не оба ноль. sweep ненулевой, |sweep|≤360. При полном круге шаг sweep/count, при неполном sweep/(count-1). Ответ copies содержит только новые копии; total_count включает исходник.
-- hatch_polygon: простой многоугольник ≥3 вершин; step — мм бумаги. Не рассчитывай на автоматическую обработку самопересечений. hatch_rectangle имеет default step=100, поэтому для обычной штриховки явно задавай, например, step=3.5.
-- create_view: scale — коэффициент, не знаменатель. x/y — положение на листе, angle — поворот вида. set_active_view требует номер из фактического ответа/состояния.
-- create_layer: number и color проверяй в исходниках/схеме; color — нативное целое цветовое значение КОМПАС, не строка hex. Перед созданием цветных маршрутов активируй нужный слой и проверяй PNG(color_mode="layer").
-- list_objects: limit 5000 default, максимум 10000; проверяй truncated. owner/sheet не смешивать при вычислении переносов.
-- rotate_object: угол относительный; set_object_properties(angle=...) абсолютный и только для rectangle. resize_rectangle меняет ширину/высоту, а не позицию.
-- Сохранение/экспорт/перенос и ограничения редактирования: editing-and-verification.md. Токены/тайм-ауты/пакеты: local-workflow.md.
+```python
+create_part(name: str = 'Part') -> dict
+```
+
+Create a separate native 3D part in the current server session.
+
+## create_assembly
+
+```python
+create_assembly(name: str = 'Assembly') -> dict
+```
+
+Create a separate native assembly. Placement is explicit, without mates.
+
+## model_state
+
+```python
+model_state(document_id: str) -> dict
+```
+
+Read native solid bounds/volume and feature errors, excluding auxiliary planes.
+
+## save_model
+
+```python
+save_model(document_id: str, path: str) -> dict
+```
+
+Save a registered model, verifying fresh files and native path; mm units.
+
+## open_model
+
+```python
+open_model(path: str) -> dict
+```
+
+Open a saved M3D/A3D and issue session-scoped model references.
+
+## close_model
+
+```python
+close_model(document_id: str) -> dict
+```
+
+Close a registered model WITHOUT saving; invalidate all its model tokens.
+
+## create_sketch
+
+```python
+create_sketch(document_id: str, plane: Literal['XY', 'XZ', 'YZ'], name: str = 'Sketch', offset: float = 0) -> dict
+```
+
+Sketch on a standard/offset plane. Local XY coordinates; offset follows plane normal.
+
+## sketch_polygon
+
+```python
+sketch_polygon(document_id: str, sketch_reference: str, points: list[list[float]]) -> dict
+```
+
+Add a validated simple closed polygon in sketch-local mm.
+
+## sketch_circle
+
+```python
+sketch_circle(document_id: str, sketch_reference: str, x: float, y: float, radius: float) -> dict
+```
+
+Add a circle in sketch-local mm; radius must be positive.
+
+## extrude
+
+```python
+extrude(document_id: str, sketch_reference: str, depth: float, operation: Literal['base', 'boss', 'cut'] = 'base', reverse: bool = False, name: str = 'Extrusion') -> dict
+```
+
+Extrude along sketch normal (+ by default), for base/boss/cut; native finite depth.
+
+## set_extrusion_depth
+
+```python
+set_extrusion_depth(document_id: str, feature_reference: str, depth: float) -> dict
+```
+
+Change finite extrusion depth, rebuild and restore old depth if validation fails.
+
+## rebuild_model
+
+```python
+rebuild_model(document_id: str) -> dict
+```
+
+Rebuild a model and read feature validity/errors, not only its COM bool.
+
+## insert_component
+
+```python
+insert_component(document_id: str, path: str, name: str = 'Component') -> dict
+```
+
+Insert a saved native part into an assembly with an external source link.
+
+## set_component_placement
+
+```python
+set_component_placement(document_id: str, component_reference: str, origin: list[float], x_axis: list[float], y_axis: list[float]) -> dict
+```
+
+Set a right-handed rigid placement; vectors must be orthonormal; origin in mm.
+
+## list_components
+
+```python
+list_components(document_id: str) -> dict
+```
+
+Read native component source files and placements, returning fresh scoped tokens.
+
+## export_model
+
+```python
+export_model(document_id: str, path: str, format: Literal['stl', 'step'] = 'stl') -> dict
+```
+
+Export saved unchanged model to verified native STL in mm; STEP is rejected.
+
+## create_model_view
+
+```python
+create_model_view(document_id: str, model_path: str, projection: Literal['front', 'top', 'left', 'isometric'], name: str, x: float, y: float, scale: float = 1) -> dict
+```
+
+Linked view: front=XZ, top=XY, left=YZ; position in sheet mm, scale coefficient.
+
+## create_section_view
+
+```python
+create_section_view(document_id: str, base_view_number: int, points: list[list[float]], name: str, x: float, y: float, scale: float = 1) -> dict
+```
+
+Linked straight section. Two points in base-view mm; section origin in sheet mm.
+
+## update_model_views
+
+```python
+update_model_views(document_id: str) -> dict
+```
+
+Update linked base views before sections and read resulting source links/bounds.
+
+## model_view_state
+
+```python
+model_view_state(document_id: str) -> dict
+```
+
+Read persisted source links and projected line/circle bounds in view mm.
+
+## set_model_color
+
+```python
+set_model_color(document_id: str, color: int) -> dict
+```
+
+Set native part COLORREF (0x00BBGGRR) and verify readback; not a rendering filter.
+
+## set_model_material
+
+```python
+set_model_material(document_id: str, name: str, density_g_cm3: float) -> dict
+```
+
+Set part material and density in g/cm3, verifying persisted native properties.
+
+## Дополнения v0.7/v0.8
+
+Схемы из tools/list являются источником параметров. Loft/sweep/shell/fillet/sketch_arc/list_model_topology/set_model_display/export_model_png добавлены в v0.7; девять инструментов v0.8 описаны в [inspection-v08.md](inspection-v08.md). Общее число — 80.

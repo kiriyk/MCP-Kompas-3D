@@ -15,13 +15,16 @@ from .io_features import NativeIO
 from .edits import NativeEdits
 from .advanced_edits import AdvancedEdits
 
+from .model_inspection import ModelInspection
+from .model_appearance import ModelAppearance
+from .model_complex import ModelComplex
 from .model_documents import ModelDocuments
 from .model_features import ModelFeatures
 from .model_assembly import ModelAssembly
 from .model_io import ModelIO
 from .model_views import ModelViews
 
-class Adapter(NativeFeatures, NativeIO, NativeEdits, AdvancedEdits, ModelDocuments, ModelFeatures, ModelAssembly, ModelIO, ModelViews):
+class Adapter(ModelInspection, ModelAppearance, ModelComplex, NativeFeatures, NativeIO, NativeEdits, AdvancedEdits, ModelDocuments, ModelFeatures, ModelAssembly, ModelIO, ModelViews):
     def __init__(self):
         import pythoncom
         self.com=pythoncom;pythoncom.CoInitializeEx(pythoncom.COINIT_APARTMENTTHREADED)
@@ -175,7 +178,7 @@ class Adapter(NativeFeatures, NativeIO, NativeEdits, AdvancedEdits, ModelDocumen
         return self._view(v)
 
     def set_active_view(self,document_id: str,view_number: int) -> dict:
-        """Activate a view through API7 and verify the current number."""
+        """Activate a view through API7; associative views use API5 ksOpenView and verify the current number."""
         views=self._views(document_id);v=views.ViewByNumber(view_number)
         if v is None:raise ValueError('View not found')
         if v.ViewType in (2,3,4,5,7):self._a5(document_id).ksOpenView(view_number)
@@ -362,3 +365,10 @@ PUBLIC_TOOLS += ('create_model_view','create_section_view','update_model_views',
 PUBLIC_TOOLS += ('set_model_color',)
 
 
+
+PUBLIC_TOOLS += ('set_model_material',)
+
+
+PUBLIC_TOOLS += ('loft','sweep','shell','fillet','sketch_arc','list_model_topology','set_model_display','export_model_png')
+
+PUBLIC_TOOLS += ('select_model_topology','measure_model_geometry','check_model_measurements','check_assembly_intersections','list_model_bodies','set_model_appearance','set_model_orientation','upsert_component','remove_component')

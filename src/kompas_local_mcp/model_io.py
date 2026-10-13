@@ -25,7 +25,7 @@ def inspect_stl(path):
 
 class ModelIO:
     def export_model(self,document_id: str,path: str,format: Literal['stl','step']='stl') -> dict:
-        """Export saved unchanged model through native converters. STL uses model mm."""
+        """Export saved unchanged model to verified native STL in mm; STEP is rejected."""
         if format not in ('stl','step'):raise ValueError('Expected stl or step')
         path=windows_path(path)
         if Path(path).suffix.lower() not in ({'.stl'} if format=='stl' else {'.step','.stp'}):raise ValueError('Export extension does not match format')
@@ -33,10 +33,10 @@ class ModelIO:
         if not doc.PathName or doc.Changed:raise ValueError('Save the model before export')
         if format=='step':raise ValueError('STEP converter has not been verified for this installation')
         facts={}
+        expected=self.model_state(document_id)['bounds_mm']
         def writer(stage):
             self._model5(document_id).SaveAsEx(stage,6)
             facts.update(inspect_stl(stage))
+            if expected and any(abs(a-b)>0.05 for a,b in zip(expected['size'],facts['bounds_mm']['size'])):raise RuntimeError('STL/model bounds mismatch')
         size=verified_output(path,writer)
-        expected=self.model_state(document_id)['bounds_mm']
-        if expected and any(abs(a-b)>0.05 for a,b in zip(expected['size'],facts['bounds_mm']['size'])):raise RuntimeError('STL/model bounds mismatch')
         return {'path':path,'bytes':size,'format':format,'units':'mm (STL has no unit metadata)',**facts}

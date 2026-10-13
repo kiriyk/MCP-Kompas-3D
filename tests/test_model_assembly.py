@@ -22,4 +22,19 @@ class AssemblyTests(unittest.TestCase):
   with tempfile.TemporaryDirectory() as td:
    p=Path(td)/'test.stl';p.write_bytes(b' ' *80+struct.pack('<I',2)+b' ' *50)
    with self.assertRaises(ValueError):inspect_stl(p)
+ def test_mismatching_stl_preserves_existing_destination(self):
+  import tempfile,struct
+  from pathlib import Path
+  from types import SimpleNamespace
+  vertices=[(0,0,0),(1,0,0),(0,1,0),(0,0,1)]
+  data=b' '*80+struct.pack('<I',4)
+  for face in ((0,1,2),(0,1,3),(0,2,3),(1,2,3)):
+   data+=struct.pack('<12fH',0,0,0,*[n for i in face for n in vertices[i]],0)
+  a=object.__new__(Adapter);a._model_doc=lambda d:SimpleNamespace(PathName='source.m3d',Changed=False)
+  a._model5=lambda d:SimpleNamespace(SaveAsEx=lambda path,format:Path(path).write_bytes(data))
+  a.model_state=lambda d:{'bounds_mm':{'size':[2.,2.,2.]}}
+  with tempfile.TemporaryDirectory() as td:
+   dest=Path(td)/'existing.stl';dest.write_bytes(b'previous good output')
+   with self.assertRaisesRegex(RuntimeError,'bounds mismatch'):a.export_model('d',str(dest))
+   self.assertEqual(dest.read_bytes(),b'previous good output')
 if __name__=='__main__':unittest.main()

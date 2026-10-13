@@ -77,6 +77,12 @@ class ModelDocuments:
         expected='.m3d' if doc.DocumentType==4 else '.a3d'
         if Path(path).suffix.lower()!=expected:raise ValueError(f'Expected {expected}')
         target=Path(path);target.parent.mkdir(parents=True,exist_ok=True)
+        # Preserve linked source identity when saving the already named document.
+        if doc.PathName and windows_path(doc.PathName).casefold()==path.casefold() and target.is_file():
+            changed=bool(doc.Changed);before=target.stat().st_mtime_ns
+            native_status=doc.Save() if changed else None
+            if not target.stat().st_size or doc.Changed or windows_path(doc.PathName).casefold()!=path.casefold() or (changed and target.stat().st_mtime_ns==before):raise RuntimeError('Existing model save postcondition failed')
+            return {'saved':True,'path':path,'bytes':target.stat().st_size,'source_identity_preserved':True,'native_save_return':native_status}
         stage=target.with_name(f'{target.stem}.{uuid.uuid4().hex}{expected}')
         self._model5(document_id).RebuildDocument()
         doc.SaveAs(str(stage))
@@ -99,10 +105,13 @@ class ModelDocuments:
         """Read native solid bounds/volume and feature errors, excluding auxiliary planes."""
         doc=self._model_doc(document_id);part=self._part5(document_id)
         bodies=self.api5.ksBodyCollection(part.BodyCollection());count=bodies.GetCount()
+        if doc.DocumentType==5:
+            components=self.api5.ksPartCollection(self._model5(document_id).PartCollection(True))
+            count+=sum(self.api5.ksBodyCollection(self.api5.ksPart(components.GetByIndex(i)).BodyCollection()).GetCount() for i in range(components.GetCount()))
         bounds=solid_bounds(part.GetGabarit(False,False)) if count else None
         volume=float(self.api5.ksMassInertiaParam(part.CalcMassInertiaProperties(1)).v) if count else 0.
         features=[]
-        for typ,kind in ((5,'sketch'),(14,'offset_plane'),(24,'base'),(25,'boss'),(26,'cut')):
+        for typ,kind in ((5,'sketch'),(14,'offset_plane'),(24,'base'),(25,'boss'),(26,'cut'),(30,'base_loft'),(31,'boss_loft'),(32,'cut_loft'),(34,'fillet'),(43,'shell'),(45,'base_sweep'),(46,'boss_sweep'),(47,'cut_sweep')):
             coll=self.api5.ksEntityCollection(part.EntityCollection(typ))
             for i in range(coll.GetCount()):
                 entity=self.api5.ksEntity(coll.GetByIndex(i));feature=self.api5.ksFeature(entity.GetFeature())
@@ -113,12 +122,14 @@ class ModelDocuments:
                     side=definition.directionType!=1
                     item['depth_mm']=definition.GetSideParam(side)[2]
                 elif typ==5:item['reference']=self._model_token(document_id,'sketch',entity)
+                elif typ in (30,31,32,34,43,45,46,47):item['reference']=self._model_token(document_id,'feature',entity)
                 features.append(item)
         return {'document_id':document_id,'type':'part' if doc.DocumentType==4 else 'assembly','name':part.name,'path':doc.PathName,'changed':bool(doc.Changed),'body_count':count,'bounds_mm':bounds,'volume_mm3':volume,'features':features}
 
     def rebuild_model(self,document_id: str) -> dict:
         """Rebuild a model and read feature validity/errors, not only its COM bool."""
         self._model5(document_id).RebuildDocument()
+        self._invalidate_topology(document_id)
         state=self.model_state(document_id)
         errors=[f for f in state['features'] if f['error'] or not f['valid']]
         if errors:raise RuntimeError(f'Model rebuild errors: {errors}')

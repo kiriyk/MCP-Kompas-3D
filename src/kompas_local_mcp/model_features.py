@@ -5,16 +5,36 @@ from .model_documents import model_name
 from .profile_validation import polygon
 
 class ModelFeatures:
+    def set_model_material(self,document_id: str,name: str,density_g_cm3: float) -> dict:
+        """Set part material and density in g/cm3, verifying persisted native properties."""
+        density_g_cm3=positive(density_g_cm3,'density_g_cm3');name=model_name(name);self._model_doc(document_id,4)
+        part=self._part5(document_id);old=(part.material,part.density)
+        try:
+            part.SetMaterial(name,density_g_cm3);part.Update()
+            if part.material!=name or abs(part.density-density_g_cm3)>1e-8:raise RuntimeError('Material postcondition failed')
+        except Exception:
+            part.SetMaterial(*old);part.Update();raise
+        return {'material':part.material,'density_g_cm3':part.density}
     def set_model_color(self,document_id: str,color: int) -> dict:
         """Set native part COLORREF (0x00BBGGRR) and verify readback; not a rendering filter."""
         if isinstance(color,bool) or not isinstance(color,int) or not 0<=color<=0xFFFFFF:raise ValueError('Color must be an integer COLORREF 0..0xFFFFFF')
-        part=self._part5(document_id);old=part.GetAdvancedColor();old_use=part.useColor
+        doc=self.api7.IKompasDocument3D(self._model_doc(document_id))
+        part=doc.TopPart
+        def color_param(target):
+            interface=self.api7.IColorParam7
+            return interface(target._oleobj_.QueryInterface(interface.CLSID,self.com.IID_IDispatch))
+        params=color_param(part);old=params.GetAdvancedColor()
+        if not old[0]:raise RuntimeError('Cannot read native part color')
         try:
-            part.useColor=1;part.SetAdvancedColor(color,.4,.8,.2,.5,0,0);part.Update()
-            actual=part.GetAdvancedColor()
-            if not actual[0] or actual[1]!=color:raise RuntimeError('Part color postcondition failed')
+            # SDK Transparency is opacity: 1 is opaque, 0 is invisible.
+            if tuple(old[1:])!=(color,.4,.8,.2,.5,1,0):
+                if not params.SetAdvancedColor(color,.4,.8,.2,.5,1,0) or not part.Update():
+                    raise RuntimeError('Native part color update failed')
+            actual=color_param(doc.TopPart).GetAdvancedColor()
+            if not actual[0] or actual[1]!=color or abs(actual[6]-1)>1e-8:
+                raise RuntimeError('Part color/opacity postcondition failed')
         except Exception:
-            part.SetAdvancedColor(*old[1:]);part.useColor=old_use;part.Update();raise
+            params.SetAdvancedColor(*old[1:]);part.Update();raise
         return {'color':actual[1],'color_format':'COLORREF 0x00BBGGRR'}
     def create_sketch(self,document_id: str,plane: Literal['XY','XZ','YZ'],name: str='Sketch',offset: float=0) -> dict:
         """Sketch on a standard/offset plane. Local XY coordinates; offset follows plane normal."""
@@ -45,10 +65,13 @@ class ModelFeatures:
     def _edit_sketch(self,document_id,reference,writer):
         self._model_doc(document_id,4);sketch=self._model_ref(document_id,reference,'sketch')
         definition=self.api5.ksSketchDefinition(sketch.GetDefinition())
-        cad=self.api5.ksDocument2D(definition.BeginEdit());created=[]
-        try:writer(cad,created)
+        raw=definition.BeginEdit();cad=None;created=[]
+        try:
+            cad=self.api5.ksDocument2D(raw)
+            writer(cad,created)
         except Exception:
-            for ref in reversed(created):cad.ksDeleteObj(ref)
+            if cad is not None:
+                for ref in reversed(created):cad.ksDeleteObj(ref)
             raise
         finally:
             if not definition.EndEdit():raise RuntimeError('EndEdit failed; inspect model edit mode before continuing')

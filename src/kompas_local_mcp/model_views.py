@@ -47,7 +47,7 @@ class ModelViews:
             cut.X1=pts[0][0];cut.Y1=pts[0][1]-8/scale;cut.X2=pts[1][0];cut.Y2=pts[1][1]+8/scale;cut.Text.Str=name
             if not cut.Update() or not cut.Reference:raise RuntimeError('Native section line failed')
             section=views.Add(7);av=self.api7.IAssociationView(section)
-            av.SourceFileName=source;av.BaseView=base;av.BaseObject=cut;av.Section=True;av.Name=f'{name}-{name}';av.X=x;av.Y=y;av.Scale=scale
+            av.SourceFileName=source;av.BaseView=base;av.BaseObject=cut;av.Section=True;av.UseOcclusion=False;av.Name=f'{name}-{name}';av.X=x;av.Y=y;av.Scale=scale
             if not av.Update() or not av.ObjectCount:raise RuntimeError('Section view produced no geometry')
             self._a5(document_id).ksOpenView(section.Number)
             return {'view_number':section.Number,**self._view(section),'source_path':av.SourceFileName,'base_view_number':base.Number,'section':True,'cut_points':list(cut.Points)}
